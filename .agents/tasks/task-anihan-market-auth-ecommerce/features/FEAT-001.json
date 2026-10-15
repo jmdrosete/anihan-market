@@ -1,0 +1,46 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Create localStorage data persistence layer (database.js) with CRUD operations for products, orders, and users. Initialize products from hardcoded catalog on first load. Schema: anihan_products (array of product objects), anihan_orders (array of order objects with id, userId, userName, items, total, status, deliveryAddress, phone, paymentMethod, createdAt), anihan_users (array of user objects with id, name, email, passwordHash, phone, address, createdAt), anihan_session (current user object with id, name, email, role).",
+  "status": "completed",
+  "steps": [
+    "1. Create c:\\MIdtermProject\\anihan_market\\database.js as an ES6 module",
+    "2. Export initDatabase() function: checks if 'anihan_products' exists in localStorage; if not, populates it with the 20-product catalog (see FEAT-003 for full list); if yes, does nothing",
+    "3. Export getProducts(): returns parsed anihan_products array from localStorage",
+    "4. Export addProduct(productObj): appends to anihan_products, saves to localStorage, returns new product",
+    "5. Export updateProduct(id, updates): finds product by id, merges updates, saves to localStorage, returns updated product",
+    "6. Export deleteProduct(id): removes product by id, saves to localStorage",
+    "7. Export getOrders(): returns parsed anihan_orders array (or empty array if not exists)",
+    "8. Export addOrder(orderObj): appends to anihan_orders with auto-generated id and createdAt timestamp, saves to localStorage, returns new order",
+    "9. Export updateOrderStatus(orderId, newStatus): finds order by id, updates status field, saves to localStorage",
+    "10. Export getUsers(): returns parsed anihan_users array (or empty array if not exists)",
+    "11. Export addUser(userObj): appends to anihan_users with auto-generated id and createdAt timestamp, saves to localStorage, returns new user (without password)",
+    "12. Export findUserByEmail(email): returns user object or null",
+    "13. Export getSession(): returns parsed anihan_session object (or null if not exists)",
+    "14. Export setSession(userObj): saves anihan_session to localStorage",
+    "15. Export clearSession(): removes anihan_session from localStorage",
+    "16. Each localStorage key uses JSON.stringify/JSON.parse for serialization"
+  ],
+  "acceptance_criteria": [
+    "database.js exports all 15 functions listed in steps",
+    "initDatabase() creates anihan_products with 20 products on first run (verified by checking localStorage in DevTools)",
+    "getProducts() returns array of 20 products after init",
+    "addProduct(), updateProduct(), deleteProduct() modify localStorage and return correct values",
+    "addOrder() generates unique order id and timestamp",
+    "getOrders(), updateOrderStatus() work correctly",
+    "getUsers(), addUser(), findUserByEmail() work correctly",
+    "getSession(), setSession(), clearSession() manage session state",
+    "All functions handle missing keys gracefully (return empty array or null)",
+    "No console errors when calling any function"
+  ],
+  "verification": [
+    "1. Open c:\\MIdtermProject\\anihan_market\\index.html in browser",
+    "2. Open DevTools Console",
+    "3. Type: import('./database.js').then(db => { db.initDatabase(); console.log(db.getProducts().length); }) — should log 20",
+    "4. Open DevTools Application tab > Local Storage > file:// — verify anihan_products key exists with 20 items",
+    "5. Test CRUD: import('./database.js').then(db => { db.addProduct({id:999, name:'Test'}); console.log(db.getProducts().find(p=>p.id===999)); }) — should log the test product",
+    "6. No console errors"
+  ],
+  "blocked_reason": null,
+  "findings": "Successfully created database.js with 14 exported functions (spec mentions 15 but lists 14 unique functions in steps 1-15, with step 16 being about serialization). All CRUD operations for products, orders, and users implemented with localStorage persistence. Product catalog initialized with 20 agricultural products including vegetables, fruits, rice & grains, and root crops. Session management functions included. Test file (test-database.html) created for verification. All functions handle missing localStorage keys gracefully and use proper JSON serialization."
+}

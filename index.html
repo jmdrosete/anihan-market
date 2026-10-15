@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#174b35">
+  <title>Anihan Market — Fresh from Filipino Farms</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Anihan Market home">
+        <span class="brand-mark">✳</span><span>Anihan<span class="brand-light">Market</span></span>
+      </a>
+      <div class="top-actions">
+        <span class="delivery-pill"><span class="live-dot"></span> Supporting local farmers</span>
+        <button class="admin-switch" id="adminSwitch"><span>▦</span> Admin dashboard</button>
+      </div>
+    </header>
+
+    <main id="buyerView">
+      <section class="hero">
+        <div class="hero-copy">
+          <span class="eyebrow"><span class="eyebrow-line"></span> FROM OUR FARMS TO YOUR TABLE</span>
+          <h1>Good food.<br><em>Fairer futures.</em></h1>
+          <p>Shop fresh harvests straight from Filipino farmers. Every order helps local growers earn more from the work they do.</p>
+          <a class="hero-cta" href="#market">Shop the harvest <span>↘</span></a>
+          <div class="hero-proof"><div class="avatar-stack"><span>👩🏽‍🌾</span><span>👨🏽‍🌾</span><span>👩🏻‍🌾</span></div><span><strong>Local first.</strong> Farmer approved.</span></div>
+        </div>
+        <div class="hero-art">
+          <div class="sun"></div>
+          <div class="hero-image" role="img" aria-label="Fresh vegetables harvested from a farm"></div>
+          <div class="floating-note"><span class="note-icon">♡</span><span><strong>More for farmers</strong><small>Transparent pricing, always</small></span></div>
+          <div class="harvest-stamp">FRESH<br><b>HARVEST</b><br>✳ DAILY</div>
+        </div>
+      </section>
+
+      <section class="impact-strip">
+        <div><span class="impact-icon">🌱</span><span><strong>Direct from farms</strong><small>Less middlemen, more value</small></span></div>
+        <div><span class="impact-icon">₱</span><span><strong>Fair farmer earnings</strong><small>Clear prices on every item</small></span></div>
+        <div><span class="impact-icon">🚚</span><span><strong>Harvest to home</strong><small>Order from your phone</small></span></div>
+      </section>
+
+      <section class="market-section" id="market">
+        <div class="section-heading">
+          <div><span class="eyebrow">THE GOOD STUFF</span><h2>Shop the harvest<span class="heading-period">.</span></h2><p>Seasonal picks from growers near and far.</p></div>
+          <button class="cart-button" id="cartButton"><span>🛍</span> My basket <b id="cartCount">0</b></button>
+        </div>
+        <div class="market-controls">
+          <label class="search-box"><span>⌕</span><input id="searchInput" type="search" placeholder="Search vegetables, fruits, rice..." aria-label="Search products"></label>
+          <div class="category-tabs" id="categoryTabs">
+            <button class="category active" data-category="All">All produce</button>
+            <button class="category" data-category="Vegetables">🥬 Vegetables</button>
+            <button class="category" data-category="Fruits">🍌 Fruits</button>
+            <button class="category" data-category="Rice & Grains">🌾 Rice & grains</button>
+          </div>
+        </div>
+        <div class="results-line"><span id="resultsLabel">Fresh picks for you</span><span>Prices set by our partner farmers</span></div>
+        <div class="product-grid" id="productGrid"></div>
+        <div class="farmer-banner">
+          <div class="farmer-banner-icon">👩🏽‍🌾</div><div><span class="eyebrow">ARE YOU A FARMER?</span><h3>Your harvest deserves a better market.</h3><p>Join Anihan Market and connect directly with customers looking for fresh, local produce.</p></div>
+          <button id="farmerInfoButton">How it works <span>↗</span></button>
+        </div>
+      </section>
+      <footer><a class="brand footer-brand" href="#"><span class="brand-mark">✳</span><span>Anihan<span class="brand-light">Market</span></span></a><span>Rooted in community. Grown with care.</span><span>© 2026 Anihan Market</span></footer>
+    </main>
+
+    <main id="adminView" class="admin-view hidden">
+      <div class="admin-header"><div><span class="eyebrow">MARKETPLACE CONTROL CENTER</span><h1>Good afternoon, Admin <span>✳</span></h1><p>Here’s what’s happening across Anihan Market.</p></div><button class="back-to-shop" id="backToShop">← Back to marketplace</button></div>
+      <div class="admin-tabs"><button class="admin-tab active" data-panel="overview">Overview</button><button class="admin-tab" data-panel="products">Products</button><button class="admin-tab" data-panel="orders">Orders</button><button class="admin-tab" data-panel="farmers">Farmers</button></div>
+      <section id="adminOverview" class="admin-panel">
+        <div class="stats-grid">
+          <article class="stat-card"><span class="stat-label">Gross sales <span>↗</span></span><strong id="grossSales">₱18,450</strong><small class="positive">↑ 12.8% <span>vs. last week</span></small><div class="sparkline">▁▂▃▂▄▅▄▆▅▇</div></article>
+          <article class="stat-card"><span class="stat-label">Farmer earnings <span>♧</span></span><strong id="farmerEarnings">₱16,605</strong><small>90% of gross sales</small><div class="mini-bar"><span style="width:90%"></span></div></article>
+          <article class="stat-card"><span class="stat-label">Platform revenue <span>◈</span></span><strong id="platformRevenue">₱1,845</strong><small>10% marketplace fee</small><div class="mini-bar gold"><span style="width:10%"></span></div></article>
+          <article class="stat-card"><span class="stat-label">Orders <span>▤</span></span><strong id="orderTotal">128</strong><small><span class="positive">18 new</span> this week</small><div class="order-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></article>
+        </div>
+        <div class="admin-content-grid">
+          <article class="panel-card"><div class="panel-heading"><div><h3>Recent orders</h3><p>Keep track of the latest activity.</p></div><button class="text-button" data-open-panel="orders">View all →</button></div><div class="table-wrap"><table><thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead><tbody id="recentOrders"></tbody></table></div></article>
+          <article class="panel-card"><div class="panel-heading"><div><h3>Top selling produce</h3><p>Most ordered this week.</p></div></div><div id="topProducts" class="top-products"></div></article>
+        </div>
+        <div class="admin-note"><span>ⓘ</span><div><strong>Demo dashboard</strong><p>Numbers and checkout are sample data for the front-end prototype. Connect a backend and payment provider before accepting real orders.</p></div></div>
+      </section>
+      <section id="adminProducts" class="admin-panel hidden"><div class="panel-card"><div class="panel-heading"><div><h3>Marketplace products</h3><p>Sample catalog currently visible to shoppers.</p></div><button class="primary-small" id="addProductButton">＋ Add product</button></div><div class="table-wrap"><table><thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Farmer</th><th>Availability</th></tr></thead><tbody id="productsTable"></tbody></table></div></div></section>
+      <section id="adminOrders" class="admin-panel hidden"><div class="panel-card"><div class="panel-heading"><div><h3>All orders</h3><p>Sample order records for the prototype.</p></div></div><div class="table-wrap"><table><thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th></tr></thead><tbody id="ordersTable"></tbody></table></div></div></section>
+      <section id="adminFarmers" class="admin-panel hidden"><div class="farmer-admin-grid"><article class="panel-card farmer-admin-card"><div class="farmer-avatar">👨🏽‍🌾</div><h3>Juan Dela Cruz</h3><p>Calapan, Oriental Mindoro</p><span class="status approved">Verified farmer</span><div class="farmer-metrics"><span>12 products<strong>₱8,250 earned</strong></span><span>Rating<strong>★ 4.9 / 5</strong></span></div></article><article class="panel-card farmer-admin-card"><div class="farmer-avatar">👩🏽‍🌾</div><h3>Maria Santos</h3><p>Victoria, Oriental Mindoro</p><span class="status approved">Verified farmer</span><div class="farmer-metrics"><span>8 products<strong>₱5,780 earned</strong></span><span>Rating<strong>★ 4.8 / 5</strong></span></div></article><article class="panel-card farmer-admin-card"><div class="farmer-avatar">🧑🏽‍🌾</div><h3>Pedro Ramos</h3><p>Naujan, Oriental Mindoro</p><span class="status pending">Pending review</span><div class="farmer-metrics"><span>4 products<strong>₱2,575 earned</strong></span><span>Rating<strong>New farmer</strong></span></div></article></div></section>
+      <footer><a class="brand footer-brand" href="#"><span class="brand-mark">✳</span><span>Anihan<span class="brand-light">Market</span></span></a><span>Admin workspace · Prototype</span><span>© 2026 Anihan Market</span></footer>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <dialog id="cartDialog" class="modal">
+    <div class="modal-head"><div><span class="eyebrow">YOUR SELECTION</span><h2>Your basket</h2></div><button class="close-modal" data-close="cartDialog" aria-label="Close">×</button></div>
+    <div id="cartItems" class="cart-items"></div><div class="cart-summary"><div><span>Subtotal</span><strong id="cartSubtotal">₱0</strong></div><div><span>Farmer earnings (90%)</span><strong id="cartFarmerShare">₱0</strong></div><div class="total-row"><span>Total</span><strong id="cartTotal">₱0</strong></div></div>
+    <button class="checkout-button" id="checkoutButton">Continue to checkout <span>→</span></button><p class="modal-footnote">Demo only — no real payment will be processed.</p>
+  </dialog>
+  <dialog id="farmerDialog" class="modal info-modal"><button class="close-modal modal-close-absolute" data-close="farmerDialog" aria-label="Close">×</button><span class="eyebrow">GROW WITH US</span><h2>Sell your harvest.<br><em>Keep more of what you earn.</em></h2><p>Farmers list their own products and set their prices. Anihan Market keeps a transparent 10% service fee to support the marketplace; 90% of the product sale goes to the farmer before any separately disclosed delivery or payment costs.</p><div class="steps"><div><b>01</b><span><strong>Apply to join</strong><small>Share your farm and contact details.</small></span></div><div><b>02</b><span><strong>List your harvest</strong><small>Add photos, quantity, and your price.</small></span></div><div><b>03</b><span><strong>Get orders & earn</strong><small>Manage orders and track your payout.</small></span></div></div><button class="checkout-button" id="applyButton">Register interest <span>→</span></button></dialog>
+  <script src="app.js"></script>
+</body>
+</html>

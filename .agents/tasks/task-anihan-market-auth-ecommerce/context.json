@@ -1,0 +1,20 @@
+{
+  "project_type": "Vanilla HTML/CSS/JavaScript single-page application with localStorage persistence",
+  "language": "JavaScript (ES6+), HTML5, CSS3",
+  "build_system": "None — static files served directly. No build step, no bundler, no package.json. Open index.html in browser or use Live Server.",
+  "test_framework": "None — manual testing in browser",
+  "build_command": "None",
+  "test_command": "Manual: open c:\\MIdtermProject\\anihan_market\\index.html in browser and verify functionality",
+  "verification_instructions": "1. Open index.html in browser (Chrome/Edge/Firefox)\n2. Test user registration and login\n3. Test product browsing, search, category filter\n4. Test cart operations (add, update quantity, remove)\n5. Test checkout flow (order form, confirmation)\n6. Test 'My Orders' viewing past orders\n7. Test admin login (admin@anihan.ph / anihan2024admin)\n8. Test admin CRUD: add/edit/delete products, view orders, view customers\n9. Check localStorage persistence: refresh page, verify session/cart/orders persist\n10. Check responsive design on mobile viewport (DevTools)",
+  "snapshot_or_generated_files": null,
+  "environment_constraints": "No build tools. All code runs directly in browser. localStorage API used for persistence (not secure for production). btoa() used for password hashing (demo only, not production-ready).",
+  "contribution_requirements": "User request is in Tagalog/Filipino. Implementation must match the original request: 'paganahin mo lahat' (make everything functional) — user side for buying products, admin side for monitoring products, agriculture-focused product catalog with images (palay, etc.), full CRUD for products.",
+  "key_patterns": "1. Modal dialogs using <dialog> element with .showModal() and .close()\n2. Toast notifications via notify() function\n3. Product rendering uses template literals with array.map()\n4. Event delegation: grid.querySelectorAll('[data-add]').forEach(...)\n5. Currency formatting: peso() helper using toLocaleString\n6. View switching: toggles .hidden class on #buyerView and #adminView\n7. Admin tabs: data-panel attribute switches between admin panels\n8. CSS uses CSS custom properties (--green, --ink, etc.)\n9. Responsive: mobile-first with @media queries at 1000px, 700px, 370px\n10. No frameworks — vanilla DOM manipulation only",
+  "relevant_files": [
+    "c:\\MIdtermProject\\anihan_market\\index.html",
+    "c:\\MIdtermProject\\anihan_market\\app.js",
+    "c:\\MIdtermProject\\anihan_market\\style.css",
+    "c:\\MIdtermProject\\anihan_market\\README.md"
+  ],
+  "directory_structure": "c:\\MIdtermProject\\anihan_market/\n├── index.html — single-page app with buyer view, admin view, modals\n├── app.js — current: 8 products, cart logic, admin dashboard sample data\n├── style.css — complete responsive CSS\n├── README.md — project documentation\n├── auth.js — TO CREATE: authentication logic\n└── database.js — TO CREATE: localStorage data layer"
+}
