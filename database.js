@@ -149,6 +149,7 @@ export function updateOrderStatus(orderId, newStatus) {
   if (index === -1) return null;
   
   orders[index].status = newStatus;
+  orders[index].updatedAt = new Date().toISOString();
   localStorage.setItem('anihan_orders', JSON.stringify(orders));
   return orders[index];
 }
@@ -222,4 +223,113 @@ export function setSession(userObj) {
  */
 export function clearSession() {
   localStorage.removeItem('anihan_session');
+}
+
+// ========================================
+// ORDER QUERIES
+// ========================================
+
+/**
+ * Get orders for a specific user
+ * @param {string} userId - User id to filter orders by
+ * @returns {Array} Array of order objects for the user, sorted by createdAt descending
+ */
+export function getUserOrders(userId) {
+  const orders = getOrders();
+  return orders
+    .filter(o => o.userId === userId)
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+}
+
+// ========================================
+// PRODUCT HELPERS
+// ========================================
+
+/**
+ * Get next available product ID
+ * @returns {number} Next product ID
+ */
+export function getNextProductId() {
+  const products = getProducts();
+  return Math.max(...products.map(p => p.id), 0) + 1;
+}
+
+// ========================================
+// USER UPDATE OPERATIONS
+// ========================================
+
+/**
+ * Update user information
+ * @param {string} userId - User ID to update
+ * @param {Object} updates - Fields to update (name, phone, address)
+ * @returns {Object|null} Updated user (without password) or null if not found
+ */
+export function updateUser(userId, updates) {
+  const users = getUsers();
+  const index = users.findIndex(u => u.id === userId);
+  if (index === -1) return null;
+  
+  users[index] = { ...users[index], ...updates };
+  localStorage.setItem('anihan_users', JSON.stringify(users));
+  
+  // Update session if current user
+  const session = getSession();
+  if (session && session.id === userId) {
+    const updatedSession = { ...session, ...updates };
+    setSession(updatedSession);
+  }
+  
+  // Return without password
+  const { passwordHash, ...userWithoutPassword } = users[index];
+  return userWithoutPassword;
+}
+
+/**
+ * Update user password
+ * @param {string} userId - User ID
+ * @param {string} newPasswordHash - New hashed password
+ * @returns {boolean} Success status
+ */
+export function updateUserPassword(userId, newPasswordHash) {
+  const users = getUsers();
+  const index = users.findIndex(u => u.id === userId);
+  if (index === -1) return false;
+  
+  users[index].passwordHash = newPasswordHash;
+  localStorage.setItem('anihan_users', JSON.stringify(users));
+  return true;
+}
+
+// ========================================
+// STOCK MANAGEMENT
+// ========================================
+
+/**
+ * Update product stock by adding or subtracting a quantity
+ * @param {number} productId - Product id to update
+ * @param {number} quantityDelta - Amount to add (positive) or subtract (negative)
+ * @returns {Object|null} Updated product or null if not found or stock would be negative
+ */
+export function updateProductStock(productId, quantityDelta) {
+  const products = getProducts();
+  const index = products.findIndex(p => p.id === productId);
+  if (index === -1) return null;
+  
+  const newStock = products[index].stock + quantityDelta;
+  
+  // Prevent negative stock
+  if (newStock < 0) return null;
+  
+  products[index].stock = newStock;
+  localStorage.setItem('anihan_products', JSON.stringify(products));
+  return products[index];
+}
+
+/**
+ * Get products with stock below a threshold
+ * @param {number} threshold - Stock threshold (default 10)
+ * @returns {Array} Array of low stock products
+ */
+export function getLowStockProducts(threshold = 10) {
+  return getProducts().filter(p => p.stock < threshold);
 }

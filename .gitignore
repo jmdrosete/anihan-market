@@ -1,0 +1,16 @@
+# Ignore files with tokens
+*.bat
+PUSH.ps1
+.git/credentials
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore editor files
+.vscode/
+.idea/
+
+# Ignore logs
+*.log
+npm-debug.log*

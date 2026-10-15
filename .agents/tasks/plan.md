@@ -1,516 +1,144 @@
-# Implementation Plan: Anihan Market Full Functionality
+# Implementation Plan - Anihan Market E-Commerce Features
 
-This plan transforms the Anihan Market front-end prototype into a fully functional agricultural marketplace with user authentication, expanded product catalog (20 products), shopping cart with checkout, order management, and admin CRUD operations, all persisted in localStorage.
+This plan implements critical e-commerce functionality for the Anihan Market agricultural products platform. The system uses vanilla JavaScript with localStorage persistence - no build tools or backend required.
 
-**Original request (Tagalog):** "paganahin mo lahat ng nasa project na ito gust ko merong user side at merong admin si user yung bibibli ng mga product then si admin ang maga monitor ng mga product patungkol ito sa agriculture at yung mga product na kailanga ilagay mo jan with images halimbawa palay at marami pang iba"
+## Overview
 
-**Translation:** Make everything in this project functional. I want a user side and an admin side. The user will buy products and the admin will monitor the products. This is about agriculture and the products that need to be included with images, for example palay (rice) and many others.
+**Current state:** Authentication (user/admin), product catalog (20 items), basic cart and checkout exist. Admin dashboard has limited functionality.
 
----
+**Goal:** Complete the marketplace with order history, stock management, order status updates, product CRUD, and user profiles.
 
-## Implementation Order
-
-The work is organized into 4 features, implemented sequentially:
-
-1. **FEAT-001**: Data persistence layer (database.js)
-2. **FEAT-002**: Authentication system (auth.js)
-3. **FEAT-003**: Product catalog expansion (8 → 20 products, add Root Crops category)
-4. **FEAT-004**: UI integration (modals, checkout flow, admin CRUD)
+**Technology:** Pure HTML/CSS/JS with ES6 modules, localStorage data layer, responsive design.
 
 ---
 
-## FEAT-001: Data Persistence Layer (database.js)
+## Implementation Steps
 
-### Objective
-Create localStorage-based data layer with CRUD operations for products, orders, and users.
+- [ ] 1. **User Order History - Database Functions**
+      Add getUserOrders(userId) to database.js that filters getOrders() by userId and returns array sorted by createdAt descending (newest first).
+      Files: c:\MIdtermProject\anihan_market\database.js
+      Verify: Open browser console, run `import {getUserOrders} from './database.js'; console.log(getUserOrders('user_test'))` - should return filtered orders array.
 
-### Steps
+- [ ] 2. **User Order History - UI and Modal**
+      Add 'My Orders' button to topbar userInfo div in index.html (after userName, before logoutButton). Create orderHistoryDialog modal with modal-head (title 'My Orders'), filter tabs container (All/Pending/Processing/Delivered/Cancelled buttons with .category styling), orders list container (#ordersList), close button. In app.js, add renderOrderHistory() function that calls getUserOrders(currentUser.id), renders order cards showing order.id, formatted date, items.length, total (peso), status badge, and 'Reorder' button per order. Implement filter tabs with click handlers that filter displayed orders by status. Add 'My Orders' button click handler to show modal.
+      Files: c:\MIdtermProject\anihan_market\index.html, c:\MIdtermProject\anihan_market\app.js
+      Verify: Open index.html, login as user, place test orders, click 'My Orders' - modal opens showing orders. Test filter tabs. Check responsive layout on mobile viewport.
 
-- [ ] 1. Create `c:\MIdtermProject\anihan_market\database.js` as ES6 module
-      Files: database.js
-      Verify: Open index.html in browser, test import in DevTools Console
+- [ ] 3. **User Order History - Reorder Functionality**
+      In app.js renderOrderHistory(), add reorder button handler that reads order.items array, iterates items, sets cart[item.productId] = item.quantity, calls updateCartCount(), shows 'Items added to cart!' toast, and closes modal. Add empty state in ordersList when getUserOrders returns empty array: display message 'You haven't placed any orders yet. Start shopping!' with empty-state class.
+      Files: c:\MIdtermProject\anihan_market\app.js
+      Verify: Click 'Reorder' on order - verify cart count updates, cart modal shows correct items and quantities, toast appears. Test with user who has no orders - verify empty state message.
 
-- [ ] 2. Implement product data functions
-      Export: `initDatabase()` (populates anihan_products with 20-product catalog on first run), `getProducts()`, `addProduct(obj)`, `updateProduct(id, updates)`, `deleteProduct(id)`
-      Files: database.js
-      Verify: In DevTools Console: `import('./database.js').then(db => { db.initDatabase(); console.log(db.getProducts().length); })` — should log 20
+- [ ] 4. **Product Stock Management - Database Functions**
+      Add updateProductStock(productId, quantityDelta) to database.js that gets products array, finds product by id, adds quantityDelta to product.stock, validates stock >= 0, saves to localStorage anihan_products, returns updated product or null if not found. Add getLowStockProducts(threshold = 10) that returns getProducts().filter(p => p.stock < threshold).
+      Files: c:\MIdtermProject\anihan_market\database.js
+      Verify: Browser console test: `import {updateProductStock} from './database.js'; updateProductStock(1, -5)` - check product stock decreased by 5 in localStorage.
 
-- [ ] 3. Implement order data functions
-      Export: `getOrders()`, `addOrder(orderObj)` (auto-generates id and createdAt), `updateOrderStatus(orderId, newStatus)`
-      Files: database.js
-      Verify: In DevTools Console test addOrder and getOrders, check localStorage
+- [ ] 5. **Product Stock Management - Checkout Integration**
+      In app.js checkoutButton handler, after successful addOrder() call, iterate through cart Object.entries, call updateProductStock(Number(id), -quantity) for each item. After all stock updates, call renderProducts() to refresh product grid with new stock levels. Clear cart after as currently implemented.
+      Files: c:\MIdtermProject\anihan_market\app.js
+      Verify: Add items to cart, checkout - verify product stock decreased in localStorage and product grid updates to show new stock levels. Place order that depletes stock to 0 - verify next step's out-of-stock badge appears.
 
-- [ ] 4. Implement user data functions
-      Export: `getUsers()`, `addUser(userObj)` (auto-generates id and createdAt), `findUserByEmail(email)`
-      Files: database.js
-      Verify: In DevTools Console test addUser and findUserByEmail
+- [ ] 6. **Product Stock Management - UI Indicators**
+      In app.js renderProducts(), add stock checks in product card template: if product.stock === 0, add `<span class="product-tag" style="background:#e74c3c;color:white;top:50px;">Out of Stock</span>` and set add-button to disabled with style="opacity:0.5;cursor:not-allowed;pointer-events:none". If product.stock < 10 && product.stock > 0, add `<div style="font-size:9px;color:#e67e22;font-weight:700;margin-top:5px;">⚠ Only ${product.stock} left!</div>` after product-price div. In addToCart(), before incrementing cart[id], check if (cart[id]||0) + 1 > products.find(p=>p.id===id).stock - if true, notify(`Cannot add more - only ${stock} in stock`) and return early.
+      Files: c:\MIdtermProject\anihan_market\app.js
+      Verify: Set a product stock to 0 via localStorage, refresh page - verify 'Out of Stock' badge and disabled button. Set stock to 5 - verify 'Only 5 left!' warning appears. Try adding more than available stock to cart - verify error toast.
 
-- [ ] 5. Implement session management functions
-      Export: `getSession()`, `setSession(userObj)`, `clearSession()`
-      Files: database.js
-      Verify: In DevTools Console test setSession/getSession/clearSession, check localStorage anihan_session key
+- [ ] 7. **Product Stock Management - Admin Low Stock Alerts**
+      In app.js loadAdminData(), after stats-grid, add low stock alert: call getLowStockProducts(), if array.length > 0, insert admin-note div with orange background (#fff1dc), icon ⚠, heading 'Low Stock Alert', message `${count} products below 10 units`, and list of low stock items showing name, current stock. Update productsTable to show conditional stock badges: if stock === 0, red badge 'Out of Stock', if stock < 10, orange badge `Low (${stock})`, else green badge `In Stock (${stock})`.
+      Files: c:\MIdtermProject\anihan_market\app.js
+      Verify: Login as admin, view dashboard - if any products have stock < 10, verify alert appears with correct count and product list. Check Products tab - verify stock badges show with correct colors.
 
-### localStorage Schema
-- `anihan_products`: array of product objects `{id, name, category, price, unit, farmer, origin, tag, emoji, image, stock, description}`
-- `anihan_orders`: array of order objects `{id, userId, userName, items, total, status, deliveryAddress, phone, paymentMethod, createdAt}`
-- `anihan_users`: array of user objects `{id, name, email, passwordHash, phone, address, createdAt}`
-- `anihan_session`: current user object `{id, name, email, role: 'user'|'admin'}`
+- [ ] 8. **Admin Order Status Management - Database Enhancement**
+      Modify updateOrderStatus() in database.js to add timestamp: after `orders[index].status = newStatus`, add `orders[index].updatedAt = new Date().toISOString()`.
+      Files: c:\MIdtermProject\anihan_market\database.js
+      Verify: Browser console: `import {updateOrderStatus} from './database.js'; updateOrderStatus('#AN-123456', 'Processing')` - check localStorage order has updatedAt field.
 
-### Acceptance Criteria
-- All 15 functions implemented and exported
-- initDatabase() creates 20 products on first run
-- All CRUD operations persist to localStorage
-- Functions handle missing keys gracefully (return empty array or null)
-- No console errors
+- [ ] 9. **Admin Order Status Management - Dropdown UI**
+      Create statusChangeDialog modal in index.html with modal-head, message paragraph (#statusChangeMessage), confirm button (class checkout-button), cancel button (class text-button). In app.js loadAdminData(), change ordersTable and recentOrders status <span> to <select class="status-dropdown" data-order-id="${o.id}" style="font-size:10px;border:1px solid #e5e8df;border-radius:6px;padding:5px;"><option value="Pending">Pending</option><option value="Processing">Processing</option><option value="Delivered">Delivered</option><option value="Cancelled">Cancelled</option></select> with selected="${o.status===value}" for current status. Style select options with class-based colors using CSS .status-dropdown option[value="Pending"]{color:#986e3a}, etc.
+      Files: c:\MIdtermProject\anihan_market\index.html, c:\MIdtermProject\anihan_market\app.js
+      Verify: Login as admin, Orders tab - verify dropdowns show with current status selected and colored.
 
----
+- [ ] 10. **Admin Order Status Management - Change Handler with Confirmation**
+       In app.js loadAdminData(), add event listener to all .status-dropdown elements. On change, capture event, get orderId from data-order-id, oldStatus from order object, newStatus from event.target.value. Show statusChangeDialog with message `Change order ${orderId} status from ${oldStatus} to ${newStatus}?`. On confirm click, call updateOrderStatus(orderId, newStatus), check result, notify success/error, close dialog, call loadAdminData() to refresh tables. On cancel click or dialog close, find dropdown by orderId and reset value to oldStatus.
+       Files: c:\MIdtermProject\anihan_market\app.js
+       Verify: Change order status - verify confirmation modal appears with correct info. Confirm - verify toast, table refresh, localStorage updated. Cancel - verify dropdown reverts to old status.
 
-## FEAT-002: Authentication System (auth.js)
+- [ ] 11. **Admin Order Status Management - Timestamp Display**
+       In app.js loadAdminData(), for orders with updatedAt field, calculate time difference from now, format as relative time (e.g., '2h ago', '1d ago'). Add helper formatRelativeTime(isoString) that uses Date objects. In order tables, add small text after status showing `<small style="font-size:8px;color:#879188;display:block;margin-top:3px;">Updated ${formatRelativeTime(o.updatedAt)}</small>` only if o.updatedAt exists.
+       Files: c:\MIdtermProject\anihan_market\app.js
+       Verify: Change order status, refresh - verify timestamp appears. Check timestamp updates correctly for different time intervals.
 
-### Objective
-Create authentication with user registration, login, logout, session management, and hardcoded admin access.
+- [ ] 12. **Admin Product CRUD - Database Helpers**
+       Add getNextProductId() function to database.js that returns `Math.max(...getProducts().map(p => p.id), 0) + 1`. Export this function.
+       Files: c:\MIdtermProject\anihan_market\database.js
+       Verify: Browser console: `import {getNextProductId} from './database.js'; console.log(getNextProductId())` - should return highest product id + 1.
 
-### Steps
+- [ ] 13. **Admin Product CRUD - Add Product Modal and Form**
+       Create addProductDialog modal in index.html after existing dialogs. Include modal-head with title 'Add Product', form #addProductForm with fields: name (input text required), category (select with options Vegetables/Fruits/Rice & Grains/Root Crops, required), price (input number min=0 step=0.01 required), unit (input text required), stock (input number min=0 required), farmer (input text required), origin (input text required), tag (input text required), emoji (input text maxlength=2 required), description (textarea rows=3 required), image (input url required). Add submit button 'Add Product' with checkout-button class, cancel button with text-button class. Style form labels and inputs like registerDialog form with margin-bottom, font-size 11px labels, 12px inputs, border-radius 8px.
+       Files: c:\MIdtermProject\anihan_market\index.html
+       Verify: Manually open dialog via console `document.getElementById('addProductDialog').showModal()` - verify form appears with all fields styled correctly.
 
-- [ ] 1. Create `c:\MIdtermProject\anihan_market\auth.js` as ES6 module
-      Import from database.js: getUsers, addUser, findUserByEmail, getSession, setSession, clearSession
-      Files: auth.js
-      Verify: Import test in DevTools Console
+- [ ] 14. **Admin Product CRUD - Add Product Handler**
+       In app.js, wire addProductButton to open addProductDialog. Add event listener for addProductForm submit: preventDefault, validate all fields (check required, price/stock >= 0, valid URL for image using URL constructor in try-catch), show inline errors for invalid fields (add error message div below field with red text). If valid, call getNextProductId(), create product object with id and all form values (parse numbers), call addProduct(product), notify success, close dialog, reset form, call loadAdminData() and renderProducts() to refresh both admin and buyer views.
+       Files: c:\MIdtermProject\anihan_market\app.js
+       Verify: Login as admin, Products tab, click '+ Add product' - modal opens. Submit with missing fields - verify validation errors. Fill valid data, submit - verify success toast, new product appears in products table and buyer product grid.
 
-- [ ] 2. Implement password utilities
-      Export: `hashPassword(plaintext)` returns btoa(plaintext) with comment "DEMO ONLY: btoa is NOT secure for production"
-      Export: `verifyPassword(plaintext, hash)` returns btoa(plaintext) === hash
-      Files: auth.js
-      Verify: Test in console: hashPassword and verifyPassword with test strings
+- [ ] 15. **Admin Product CRUD - Edit Product Modal and Handler**
+       Create editProductDialog modal in index.html (clone addProductDialog structure but change id and title to 'Edit Product'). Add hidden input #editProductId. In app.js loadAdminData(), make productsTable rows clickable: add data-product-id="${p.id}" to <tr>, add click handler that gets productId, finds product in getProducts(), populates editProductDialog form fields with product data, shows modal. Add editProductForm submit handler: get editProductId value, get form values, call updateProduct(id, updates), notify success, close dialog, refresh views.
+       Files: c:\MIdtermProject\anihan_market\index.html, c:\MIdtermProject\anihan_market\app.js
+       Verify: Click product table row - verify edit modal opens with pre-filled data. Change values, submit - verify update succeeds, tables refresh, localStorage updated.
 
-- [ ] 3. Implement user registration
-      Export: `registerUser({name, email, password, phone, address})` validates email uniqueness, hashes password, calls addUser, returns `{success, user}` or `{success: false, error}`
-      Files: auth.js
-      Verify: In console register test user, check anihan_users in localStorage
+- [ ] 16. **Admin Product CRUD - Delete Product with Confirmation**
+       Create deleteProductDialog confirmation modal in index.html with message paragraph #deleteProductMessage, hidden input #deleteProductId, confirm button 'Delete Product' (style="background:#e74c3c"), cancel button. Add 'Actions' column header to productsTable in index.html. In app.js loadAdminData(), add delete button to each product row: `<button class="text-button" style="color:#e74c3c;" data-delete-product="${p.id}">Delete</button>`. Add click handler that gets productId, finds product, sets deleteProductMessage text to `Delete ${product.name}? This cannot be undone.`, sets deleteProductId value, shows modal. On confirm, call deleteProduct(id), notify success, close modal, refresh views.
+       Files: c:\MIdtermProject\anihan_market\index.html, c:\MIdtermProject\anihan_market\app.js
+       Verify: Click Delete on product - confirm modal appears with product name. Confirm - verify product removed from table, localStorage, and buyer grid. Cancel - verify no changes.
 
-- [ ] 4. Implement user login
-      Export: `loginUser(email, password)` validates credentials, sets session with role: 'user', returns result object
-      Files: auth.js
-      Verify: In console login with test user, check anihan_session in localStorage
+- [ ] 17. **User Profile Management - Database Functions**
+       Add updateUser(userId, updates) to database.js that gets users array, finds user by id, merges updates object into user (using Object.assign or spread), saves to localStorage anihan_users, checks if userId matches current session id and updates anihan_session with new data, returns updated user or null. Add updateUserPassword(userId, newPasswordHash) that finds user, sets user.passwordHash = newPasswordHash, saves, returns true/false.
+       Files: c:\MIdtermProject\anihan_market\database.js
+       Verify: Browser console test updateUser and updateUserPassword functions, check localStorage persistence.
 
-- [ ] 5. Implement admin login
-      Export: `loginAdmin(email, password)` checks email === 'admin@anihan.ph' && password === 'anihan2024admin', sets session with role: 'admin'
-      Files: auth.js
-      Verify: In console login with admin credentials, verify isAdmin() returns true
+- [ ] 18. **User Profile Management - Profile Modal UI**
+       Add 'My Profile' button to userInfo div in index.html topbar (after userName, before logoutButton). Create profileDialog modal with three sections: 1) panel-card div with heading 'Profile Information', form #profileForm with pre-filled fields name, phone, address (same styling as registration form), save button. 2) panel-card div with heading 'Change Password', form #passwordForm with fields currentPassword, newPassword, confirmPassword (type=password), change button. 3) panel-card div with heading 'Account Statistics', display divs for joinedDate, totalOrders, totalSpent (read-only styled text).
+       Files: c:\MIdtermProject\anihan_market\index.html
+       Verify: Manually open profileDialog - verify three sections display correctly with forms and stats placeholders.
 
-- [ ] 6. Implement session helpers
-      Export: `logout()`, `getCurrentUser()`, `isAuthenticated()`, `isAdmin()`, `requireAuth(callback)`, `requireAdmin(callback)`
-      Files: auth.js
-      Verify: Test each function in console, verify session persistence after page refresh
+- [ ] 19. **User Profile Management - Profile and Password Handlers**
+       In app.js, add 'My Profile' button click handler that calls renderProfile() and shows modal. renderProfile() gets current user, populates profileForm fields with user data, calls getUserOrders(userId), calculates totalOrders = orders.length, totalSpent = orders.reduce sum of totals, formats joinedDate from user.createdAt as 'Member since Month YYYY', displays stats. Add profileForm submit handler: validate fields not empty, call updateUser(userId, {name, phone, address}), update document.getElementById('userName').textContent, notify success. Add passwordForm submit handler: import verifyPassword and hashPassword from auth.js, validate currentPassword matches user.passwordHash using verifyPassword, validate newPassword === confirmPassword, newPassword.length >= 6, show inline errors if fail, if valid call hashPassword(newPassword) and updateUserPassword(userId, hash), notify success, reset password form.
+       Files: c:\MIdtermProject\anihan_market\app.js
+       Verify: Click 'My Profile' - modal opens with user data. Update name/address, save - verify success, userName updates. Change password with wrong current password - verify error. Change with valid data - logout, login with new password - verify works. Check stats display correct order count and total spent.
 
-### Hardcoded Admin Credentials
-- Email: admin@anihan.ph
-- Password: anihan2024admin
-
-### Acceptance Criteria
-- All 11 auth functions implemented and exported
-- Registration creates user with hashed password
-- Login validates credentials and creates session
-- Admin login accepts only hardcoded credentials
-- Session persists across page refresh
-- No console errors
-
----
-
-## FEAT-003: Product Catalog Expansion
-
-### Objective
-Expand from 8 to 20 agricultural products across 4 categories, add Root Crops category tab.
-
-### Steps
-
-- [ ] 1. Expand products array in app.js to 20 items
-      Keep existing 8, add 12 new products with Unsplash images and all required fields (id, name, category, price, unit, farmer, origin, tag, emoji, image, stock, description)
-      Files: app.js
-      Verify: Open index.html, verify 20 products display
-
-- [ ] 2. Add 7 Vegetables products
-      Existing: Pechay, Tomatoes, Eggplant, Red Onion
-      New: Sitaw (string beans), Kangkong (water spinach), Ampalaya (bitter gourd)
-      Assign appropriate Unsplash images, prices, farmers, emojis
-      Files: app.js
-      Verify: Click Vegetables tab, see 7 products
-
-- [ ] 3. Add 6 Fruits products
-      Existing: Carabao Mango, Lakatan Banana, Pineapple
-      New: Papaya, Watermelon, Calamansi
-      Assign appropriate Unsplash images, prices, farmers, emojis
-      Files: app.js
-      Verify: Click Fruits tab, see 6 products
-
-- [ ] 4. Add 4 Rice & Grains products
-      Existing: Brown Rice
-      New: White Rice (Sinandomeng), Palay (Unmilled Rice), White Corn
-      Assign appropriate Unsplash images, prices, farmers, emojis
-      Files: app.js
-      Verify: Click Rice & grains tab, see 4 products
-
-- [ ] 5. Add 3 Root Crops products (NEW CATEGORY)
-      New: Kamote (Sweet Potato), Gabi (Taro), Ube (Purple Yam)
-      Assign appropriate Unsplash images, prices, farmers, emojis
-      Files: app.js
-      Verify: Products created with category "Root Crops"
-
-- [ ] 6. Add Root Crops category tab to UI
-      Modify index.html: add `<button class="category" data-category="Root Crops">🍠 Root Crops</button>` in .category-tabs after Rice & grains button
-      Files: index.html
-      Verify: Root Crops tab appears in UI, clicking it shows 3 products
-
-- [ ] 7. Add description field to all 20 products
-      Each product gets a brief 1-sentence description
-      Files: app.js
-      Verify: Inspect products array in console, all have description field
-
-### Product Categories & Counts
-- **Vegetables** (7): Pechay, Tomatoes, Eggplant, Red Onion, Sitaw, Kangkong, Ampalaya
-- **Fruits** (6): Carabao Mango, Lakatan Banana, Pineapple, Papaya, Watermelon, Calamansi
-- **Rice & Grains** (4): Brown Rice, White Rice Sinandomeng, Palay, White Corn
-- **Root Crops** (3): Kamote, Gabi, Ube
-
-### Acceptance Criteria
-- Exactly 20 products in catalog
-- All products have all required fields including stock and description
-- Root Crops tab appears and works
-- Category filter works for all 4 categories
-- Search works with expanded catalog
-- All images load from Unsplash or show emoji fallback
+- [ ] 20. **Final Integration Testing and Responsive Design Check**
+       Test complete user flow: register → login → browse → add to cart → checkout → view order history → reorder → view profile → update profile → change password → logout. Test admin flow: login as admin → view dashboard stats → change order status → add product → edit product → delete product → check low stock alerts. Test responsive design on mobile viewport (375px width): verify all modals fit screen, forms are usable, product grid adjusts to 2 columns, admin tables scroll horizontally. Check browser console for errors. Verify all data persists across page refreshes.
+       Files: All files (integration test)
+       Verify: Run through both complete flows. Test on Chrome, Firefox, Edge. Test mobile viewport. Document any issues in findings and fix before completion.
 
 ---
 
-## FEAT-004: UI Integration & Complete Functionality
-
-### Objective
-Connect everything: auth modals, checkout flow, order history, user profile, admin CRUD for products/orders/customers.
-
-### Steps
-
-#### HTML Modals (index.html modifications)
-
-- [ ] 1. Add module script tags
-      Add `<script type="module" src="database.js"></script>` and `<script type="module" src="auth.js"></script>` before app.js script tag
-      Convert app.js script tag to `<script type="module" src="app.js"></script>`
-      Files: index.html
-      Verify: No script loading errors in console
-
-- [ ] 2. Add Login/Register modal
-      Add `<dialog id="authDialog">` with two forms: loginForm and registerForm, tabs to switch between them
-      Forms: login (email, password), register (name, email, password, phone, address)
-      Files: index.html
-      Verify: Modal appears when opened via showModal()
-
-- [ ] 3. Add Admin Login modal
-      Add `<dialog id="adminAuthDialog">` with adminLoginForm (email pre-filled with admin@anihan.ph, password)
-      Files: index.html
-      Verify: Modal structure correct
-
-- [ ] 4. Add Checkout modal
-      Add `<dialog id="checkoutDialog">` with checkoutForm (address textarea, phone, payment method dropdown with "Cash on Delivery", order total display)
-      Files: index.html
-      Verify: Modal structure correct
-
-- [ ] 5. Add Order Confirmation modal
-      Add `<dialog id="orderConfirmDialog">` showing order id and "Continue shopping" button
-      Files: index.html
-      Verify: Modal structure correct
-
-- [ ] 6. Add My Orders modal
-      Add `<dialog id="ordersDialog">` with empty div `#userOrdersList` for rendering order history
-      Files: index.html
-      Verify: Modal structure correct
-
-- [ ] 7. Add User Profile modal
-      Add `<dialog id="profileDialog">` with profileForm (name, email disabled, phone, address)
-      Files: index.html
-      Verify: Modal structure correct
-
-- [ ] 8. Add Product Form modal (admin)
-      Add `<dialog id="productDialog">` with productForm (all product fields: name, category, price, unit, stock, farmer, origin, tag, emoji, image URL, description, hidden id field)
-      Files: index.html
-      Verify: Modal structure correct
-
-- [ ] 9. Modify topbar user actions area
-      Replace .top-actions content: keep delivery pill, replace admin button with `<div id="userActions">` containing login button (will be dynamically updated by JS)
-      Files: index.html
-      Verify: Topbar structure correct
-
-#### CSS Styles (style.css modifications)
-
-- [ ] 10. Add authentication modal styles
-      Add styles for: .auth-tabs, .auth-tab, .auth-form, .auth-form label/input/textarea/select, focus states
-      Files: style.css
-      Verify: Auth modals render correctly styled
-
-- [ ] 11. Add user actions styles
-      Add styles for: .user-actions, .user-greeting, .icon-button
-      Files: style.css
-      Verify: Topbar user actions area styled correctly
-
-- [ ] 12. Add order card styles
-      Add styles for: .orders-list, .order-card, .order-card-header/id/date/items/footer/total
-      Files: style.css
-      Verify: Order history renders correctly
-
-- [ ] 13. Add responsive styles for new elements
-      Add @media queries for user-actions and icon-button at 700px breakpoint
-      Files: style.css
-      Verify: New elements responsive on mobile viewport
-
-#### JavaScript Integration (app.js modifications)
-
-- [ ] 14. Add imports and initialization
-      Add imports: `import * as db from './database.js'; import * as auth from './auth.js';`
-      Replace hardcoded products array with `let products = [];`
-      Add initApp() function: calls db.initDatabase(), loads products from db.getProducts(), calls renderProducts() and updateUIForAuth()
-      Add DOMContentLoaded listener calling initApp()
-      Files: app.js
-      Verify: Page loads, products display from database
-
-- [ ] 15. Implement updateUIForAuth()
-      Checks auth.isAuthenticated() and updates topbar #userActions:
-      If authenticated user: show user name, My Orders button, Profile button, Logout button
-      If authenticated admin: also show Admin Dashboard button
-      If not authenticated: show Log In button only
-      Files: app.js
-      Verify: Topbar updates correctly based on auth state
-
-- [ ] 16. Wire up Login/Register modal
-      #loginButton click → open authDialog
-      #loginTab/#registerTab clicks → toggle forms
-      #loginForm submit → auth.loginUser(), update UI, notify
-      #registerForm submit → auth.registerUser(), auto-login, update UI, notify
-      Files: app.js
-      Verify: Can register and login, UI updates, session persists
-
-- [ ] 17. Wire up Admin Login
-      Replace existing #adminSwitch logic
-      If auth.isAdmin(): show admin view
-      Else: open adminAuthDialog
-      #adminLoginForm submit → auth.loginAdmin(), show admin view, update UI
-      Files: app.js
-      Verify: Admin login required to access dashboard
-
-- [ ] 18. Wire up Checkout flow
-      Replace #checkoutButton handler
-      Check auth.isAuthenticated(), if not: prompt login
-      Open checkoutDialog, pre-fill address/phone from user profile
-      #checkoutForm submit → create order object, db.addOrder(), show confirmation, clear cart
-      Files: app.js
-      Verify: Complete checkout flow works, order saved to localStorage
-
-- [ ] 19. Wire up My Orders
-      Add My Orders button to userActions when authenticated
-      Click → open ordersDialog
-      Render user's orders from db.getOrders() filtered by userId, display as order cards (id, date, items, total, status)
-      Files: app.js
-      Verify: User can view their past orders
-
-- [ ] 20. Wire up User Profile
-      Add Profile button to userActions when authenticated
-      Click → open profileDialog, pre-fill with user data
-      #profileForm submit → update user in localStorage users array, update session, notify
-      Files: app.js
-      Verify: User can edit name/phone/address
-
-- [ ] 21. Wire up Logout
-      Add Logout button to userActions when authenticated
-      Click → auth.logout(), updateUIForAuth(), notify, if admin view visible: switch to buyer view
-      Files: app.js
-      Verify: Logout clears session, UI resets
-
-- [ ] 22. Wire up Admin Products CRUD
-      Modify products table to load from db.getProducts()
-      Add Edit/Delete buttons to each table row
-      #addProductButton → open productDialog (empty form)
-      Edit button → open productDialog (pre-filled)
-      #productForm submit → if id: db.updateProduct(), else: db.addProduct(), refresh table
-      Delete button → confirm, db.deleteProduct(), refresh table
-      Files: app.js
-      Verify: Admin can add/edit/delete products, changes persist
-
-- [ ] 23. Wire up Admin Orders management
-      Modify orders table to load from db.getOrders()
-      Add status dropdown per row (Pending/Processing/Delivered)
-      Dropdown change → db.updateOrderStatus(), refresh table
-      Files: app.js
-      Verify: Admin can update order status
-
-- [ ] 24. Wire up Admin Customers view
-      Rename Farmers tab to Customers in HTML
-      Replace hardcoded farmer cards with dynamic table from db.getUsers()
-      Columns: Name, Email, Phone, Registered Date, Total Orders (count from orders)
-      Files: index.html, app.js
-      Verify: Admin can view all registered customers
-
-- [ ] 25. Wire up Admin Overview stats
-      Calculate from db.getOrders(): total revenue, farmer earnings (90%), platform revenue (10%), order count
-      Update stat card values: #grossSales, #farmerEarnings, #platformRevenue, #orderTotal
-      Update recent orders table from latest orders
-      Files: app.js
-      Verify: Overview stats calculated from real data
-
-- [ ] 26. Implement cart persistence
-      On page load, restore cart from localStorage key 'anihan_cart'
-      On cart update, save to localStorage
-      Files: app.js
-      Verify: Cart persists across page refresh
-
-- [ ] 27. Wire all modal close buttons
-      Ensure all new modals' [data-close] buttons work
-      Files: app.js
-      Verify: All modals can be closed
-
-### Acceptance Criteria
-- User can register, login, logout
-- Session persists on refresh
-- Logged-in user can browse, add to cart, checkout
-- Checkout requires login
-- Order confirmation shows order id
-- My Orders shows user's past orders
-- User Profile editable
-- Admin login required for dashboard
-- Admin can CRUD products
-- Admin can view and update order status
-- Admin can view customers
-- Admin Overview shows calculated stats
-- Cart persists on refresh
-- All modals functional
-- No console errors
-
----
-
-## Testing Checklist
-
-### User Flow
-1. ✓ Register new account
-2. ✓ Login with credentials
-3. ✓ Browse 20 products across 4 categories
-4. ✓ Search products
-5. ✓ Add products to cart
-6. ✓ Update cart quantities
-7. ✓ Checkout (with login required)
-8. ✓ View order confirmation
-9. ✓ View order history
-10. ✓ Edit profile
-11. ✓ Logout
-12. ✓ Session persistence (refresh page)
-
-### Admin Flow
-1. ✓ Admin login (admin@anihan.ph / anihan2024admin)
-2. ✓ View Overview with calculated stats
-3. ✓ Add new product
-4. ✓ Edit existing product
-5. ✓ Delete product
-6. ✓ View all orders
-7. ✓ Update order status
-8. ✓ View customers list
-9. ✓ Logout
-
-### Data Persistence
-1. ✓ localStorage anihan_products populated with 20 products
-2. ✓ localStorage anihan_users contains registered users
-3. ✓ localStorage anihan_orders contains placed orders
-4. ✓ localStorage anihan_session persists on refresh
-5. ✓ localStorage anihan_cart persists on refresh
-
-### Responsive Design
-1. ✓ All modals work on mobile viewport
-2. ✓ Product grid responsive (4→3→2 columns)
-3. ✓ Admin dashboard usable on desktop
-4. ✓ Topbar responsive on mobile
-
----
-
-## Risks & Edge Cases
-
-### Security Warnings
-- **btoa() password hashing is NOT secure** — demo only, plaintext reversible with atob()
-- **localStorage accessible via JavaScript** — anyone with DevTools can read/modify data
-- **No server-side validation** — all data trusted
-- **Admin credentials hardcoded in client code** — visible in source
-- Production requires: server-side auth, bcrypt/argon2, HTTPS, CSRF protection, rate limiting
-
-### Edge Cases to Handle
-1. **Empty states**: empty cart, no orders, no products
-2. **Duplicate email registration**: show error message
-3. **Invalid login**: show error message
-4. **Cart persistence**: handle corrupted localStorage data
-5. **Image loading failures**: emoji fallback already implemented
-6. **Long product names/descriptions**: CSS overflow handling
-7. **Admin deleting all products**: allow but show empty state
-8. **User deleting own account**: not implemented (future feature)
-9. **Order cancellation**: not implemented (future feature)
-10. **Stock management**: stock field exists but not enforced (future feature)
-
-### Browser Compatibility
-- Requires ES6+ support (arrow functions, template literals, modules)
-- Requires `<dialog>` element support (Chrome 37+, Firefox 98+, Safari 15.4+)
-- Requires localStorage API
-- Tested on: Chrome, Edge, Firefox (modern versions)
-
----
-
-## File Changes Summary
-
-### New Files
-- `c:\MIdtermProject\anihan_market\database.js` — localStorage data layer
-- `c:\MIdtermProject\anihan_market\auth.js` — authentication system
-
-### Modified Files
-- `c:\MIdtermProject\anihan_market\index.html` — add 8 modals, modify topbar, add Root Crops tab, convert scripts to modules
-- `c:\MIdtermProject\anihan_market\app.js` — convert to module, integrate auth/database, expand products to 20, wire all features
-- `c:\MIdtermProject\anihan_market\style.css` — add modal styles, auth form styles, order card styles, user actions styles
-
-### Unchanged Files
-- `c:\MIdtermProject\anihan_market\README.md` — (could be updated to reflect new features, but not required)
-
----
-
-## Implementation Notes
-
-1. **Feature independence**: FEAT-001, FEAT-002, FEAT-003 can be developed independently. FEAT-004 depends on all three.
-
-2. **Testing strategy**: Each feature has its own verification steps. Manual testing in browser with DevTools open.
-
-3. **No build process**: All files edited directly, no compilation. Refresh browser to see changes.
-
-4. **Module system**: Using native ES6 modules (`type="module"` in script tags, import/export statements).
-
-5. **Data initialization**: First page load calls db.initDatabase() which populates products. Subsequent loads use existing localStorage data.
-
-6. **Session management**: anihan_session checked on page load. If exists, UI shows authenticated state.
-
-7. **Cart behavior**: Cart in memory (cart object) + localStorage for persistence. Cleared after successful checkout.
-
-8. **Admin access**: Admin role is separate from user role. Same session mechanism but different credentials and permissions.
-
-9. **Order ID generation**: Simple counter-based (e.g., #AN-1001, #AN-1002). In production, use UUID or server-generated ID.
-
-10. **Image hosting**: Using Unsplash for product images. In production, use CDN or local assets.
-
----
-
-## Future Enhancements (Out of Scope)
-
-- Server-side API and database
-- Real payment processing
-- Email notifications
-- Order tracking/delivery integration
-- Farmer onboarding/verification
-- Product reviews and ratings
-- Advanced search/filters (price range, location)
-- Stock management enforcement
-- Multi-language support (English/Tagalog toggle)
-- User account deletion
-- Order cancellation/refund
-- Admin analytics dashboard
-- Export orders to CSV
-- SMS notifications
-
----
-
-**End of Plan**
+## Notes
+
+- **No build step required** - all changes are to HTML/CSS/JS files loaded directly in browser
+- **Manual testing only** - no automated test framework, must verify each feature in browser
+- **localStorage persistence** - all data stored client-side with 'anihan_' prefix
+- **Responsive design** - maintain existing mobile breakpoints (@media max-width 700px, 1000px)
+- **Existing patterns to follow:**
+  - Use peso() helper for currency formatting
+  - Use notify() for toast messages
+  - Modals use <dialog> with .showModal() and data-close attributes
+  - Auth checks use isAuthenticated() and isAdmin() from auth.js
+  - Database CRUD returns objects/arrays or null
+  - Event listeners use arrow functions and dataset attributes
+- **Color scheme:** Green #174b35, maintain existing status colors (green=delivered, orange=pending, yellow=processing)
+- **Accessibility:** Add aria-labels to new buttons, maintain keyboard navigation
+
+## Dependencies
+
+- FEAT-002 (Stock Management) depends on FEAT-001 database patterns
+- FEAT-003 (Order Status) independent
+- FEAT-004 (Product CRUD) independent  
+- FEAT-005 (User Profile) depends on FEAT-001 (getUserOrders for stats)
+
+## Success Criteria
+
+All features implemented and verified per verification steps above. Users can manage orders and profile, admin can manage products and order status, stock tracking works, all data persists in localStorage, no console errors, responsive design maintained.

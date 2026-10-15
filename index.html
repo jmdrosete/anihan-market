@@ -18,7 +18,17 @@
       </a>
       <div class="top-actions">
         <span class="delivery-pill"><span class="live-dot"></span> Supporting local farmers</span>
-        <button class="admin-switch" id="adminSwitch"><span>▦</span> Admin dashboard</button>
+        <div id="authButtons">
+          <button class="admin-switch" id="loginButton">🔐 Login</button>
+          <button class="admin-switch" id="registerButton">📝 Register</button>
+        </div>
+        <div id="userInfo" class="hidden" style="display: flex; align-items: center; gap: 12px;">
+          <span id="userName" style="font-size: 12px; color: #64746a;"></span>
+          <button class="admin-switch" id="myProfileButton">My Profile</button>
+          <button class="admin-switch" id="myOrdersButton">My Orders</button>
+          <button class="admin-switch" id="logoutButton">Logout</button>
+        </div>
+        <button class="admin-switch hidden" id="adminSwitch"><span>▦</span> Admin dashboard</button>
       </div>
     </header>
 
@@ -57,6 +67,7 @@
             <button class="category" data-category="Vegetables">🥬 Vegetables</button>
             <button class="category" data-category="Fruits">🍌 Fruits</button>
             <button class="category" data-category="Rice & Grains">🌾 Rice & grains</button>
+            <button class="category" data-category="Root Crops">🍠 Root Crops</button>
           </div>
         </div>
         <div class="results-line"><span id="resultsLabel">Fresh picks for you</span><span>Prices set by our partner farmers</span></div>
@@ -85,7 +96,7 @@
         </div>
         <div class="admin-note"><span>ⓘ</span><div><strong>Demo dashboard</strong><p>Numbers and checkout are sample data for the front-end prototype. Connect a backend and payment provider before accepting real orders.</p></div></div>
       </section>
-      <section id="adminProducts" class="admin-panel hidden"><div class="panel-card"><div class="panel-heading"><div><h3>Marketplace products</h3><p>Sample catalog currently visible to shoppers.</p></div><button class="primary-small" id="addProductButton">＋ Add product</button></div><div class="table-wrap"><table><thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Farmer</th><th>Availability</th></tr></thead><tbody id="productsTable"></tbody></table></div></div></section>
+      <section id="adminProducts" class="admin-panel hidden"><div class="panel-card"><div class="panel-heading"><div><h3>Marketplace products</h3><p>Sample catalog currently visible to shoppers.</p></div><button class="primary-small" id="addProductButton">＋ Add product</button></div><div class="table-wrap"><table><thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Farmer</th><th>Availability</th><th>Actions</th></tr></thead><tbody id="productsTable"></tbody></table></div></div></section>
       <section id="adminOrders" class="admin-panel hidden"><div class="panel-card"><div class="panel-heading"><div><h3>All orders</h3><p>Sample order records for the prototype.</p></div></div><div class="table-wrap"><table><thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th></tr></thead><tbody id="ordersTable"></tbody></table></div></div></section>
       <section id="adminFarmers" class="admin-panel hidden"><div class="farmer-admin-grid"><article class="panel-card farmer-admin-card"><div class="farmer-avatar">👨🏽‍🌾</div><h3>Juan Dela Cruz</h3><p>Calapan, Oriental Mindoro</p><span class="status approved">Verified farmer</span><div class="farmer-metrics"><span>12 products<strong>₱8,250 earned</strong></span><span>Rating<strong>★ 4.9 / 5</strong></span></div></article><article class="panel-card farmer-admin-card"><div class="farmer-avatar">👩🏽‍🌾</div><h3>Maria Santos</h3><p>Victoria, Oriental Mindoro</p><span class="status approved">Verified farmer</span><div class="farmer-metrics"><span>8 products<strong>₱5,780 earned</strong></span><span>Rating<strong>★ 4.8 / 5</strong></span></div></article><article class="panel-card farmer-admin-card"><div class="farmer-avatar">🧑🏽‍🌾</div><h3>Pedro Ramos</h3><p>Naujan, Oriental Mindoro</p><span class="status pending">Pending review</span><div class="farmer-metrics"><span>4 products<strong>₱2,575 earned</strong></span><span>Rating<strong>New farmer</strong></span></div></article></div></section>
       <footer><a class="brand footer-brand" href="#"><span class="brand-mark">✳</span><span>Anihan<span class="brand-light">Market</span></span></a><span>Admin workspace · Prototype</span><span>© 2026 Anihan Market</span></footer>
@@ -98,7 +109,332 @@
     <div id="cartItems" class="cart-items"></div><div class="cart-summary"><div><span>Subtotal</span><strong id="cartSubtotal">₱0</strong></div><div><span>Farmer earnings (90%)</span><strong id="cartFarmerShare">₱0</strong></div><div class="total-row"><span>Total</span><strong id="cartTotal">₱0</strong></div></div>
     <button class="checkout-button" id="checkoutButton">Continue to checkout <span>→</span></button><p class="modal-footnote">Demo only — no real payment will be processed.</p>
   </dialog>
+
+  <!-- User Login Dialog -->
+  <dialog id="loginDialog" class="modal">
+    <div class="modal-head"><div><span class="eyebrow">WELCOME BACK</span><h2>Login to your account</h2></div><button class="close-modal" data-close="loginDialog" aria-label="Close">×</button></div>
+    <form id="userLoginForm">
+      <div style="margin-bottom: 15px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Email</label>
+        <input type="email" id="loginEmail" required style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+      </div>
+      <div style="margin-bottom: 20px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Password</label>
+        <input type="password" id="loginPassword" required style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+      </div>
+      <button type="submit" class="checkout-button">Login <span>→</span></button>
+    </form>
+    <p style="text-align: center; font-size: 11px; margin-top: 15px; color: #879188;">
+      Don't have an account? <button type="button" id="switchToRegister" style="border: 0; background: transparent; color: var(--green); font-weight: 700; cursor: pointer; text-decoration: underline;">Register here</button>
+    </p>
+  </dialog>
+
+  <!-- User Registration Dialog -->
+  <dialog id="registerDialog" class="modal">
+    <div class="modal-head"><div><span class="eyebrow">JOIN US</span><h2>Create your account</h2></div><button class="close-modal" data-close="registerDialog" aria-label="Close">×</button></div>
+    <form id="registerForm">
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Full Name</label>
+        <input type="text" id="regName" required style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Email</label>
+        <input type="email" id="regEmail" required style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Password</label>
+        <input type="password" id="regPassword" required style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Phone Number</label>
+        <input type="tel" id="regPhone" required style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+      </div>
+      <div style="margin-bottom: 20px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Delivery Address</label>
+        <textarea id="regAddress" required rows="2" style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px; resize: vertical;"></textarea>
+      </div>
+      <button type="submit" class="checkout-button">Create Account <span>→</span></button>
+    </form>
+    <p style="text-align: center; font-size: 11px; margin-top: 15px; color: #879188;">
+      Already have an account? <button type="button" id="switchToLogin" style="border: 0; background: transparent; color: var(--green); font-weight: 700; cursor: pointer; text-decoration: underline;">Login here</button>
+    </p>
+  </dialog>
+
+  <!-- Admin Login Dialog -->
+  <dialog id="adminLoginDialog" class="modal">
+    <div class="modal-head"><div><span class="eyebrow">ADMIN ACCESS</span><h2>Admin Login</h2></div><button class="close-modal" data-close="adminLoginDialog" aria-label="Close">×</button></div>
+    <form id="adminLoginForm">
+      <div style="background: #f3f5ed; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 10px; color: #70816e;">
+        <strong style="display: block; margin-bottom: 5px; color: #415d45;">Demo Admin Credentials:</strong>
+        Email: admin@anihan.ph<br>
+        Password: anihan2024admin
+      </div>
+      <div style="margin-bottom: 15px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Admin Email</label>
+        <input type="email" id="adminEmail" required style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+      </div>
+      <div style="margin-bottom: 20px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Admin Password</label>
+        <input type="password" id="adminPassword" required style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+      </div>
+      <button type="submit" class="checkout-button">Login as Admin <span>→</span></button>
+    </form>
+  </dialog>
+
   <dialog id="farmerDialog" class="modal info-modal"><button class="close-modal modal-close-absolute" data-close="farmerDialog" aria-label="Close">×</button><span class="eyebrow">GROW WITH US</span><h2>Sell your harvest.<br><em>Keep more of what you earn.</em></h2><p>Farmers list their own products and set their prices. Anihan Market keeps a transparent 10% service fee to support the marketplace; 90% of the product sale goes to the farmer before any separately disclosed delivery or payment costs.</p><div class="steps"><div><b>01</b><span><strong>Apply to join</strong><small>Share your farm and contact details.</small></span></div><div><b>02</b><span><strong>List your harvest</strong><small>Add photos, quantity, and your price.</small></span></div><div><b>03</b><span><strong>Get orders & earn</strong><small>Manage orders and track your payout.</small></span></div></div><button class="checkout-button" id="applyButton">Register interest <span>→</span></button></dialog>
-  <script src="app.js"></script>
+
+  <!-- Order History Dialog -->
+  <dialog id="orderHistoryDialog" class="modal">
+    <div class="modal-head">
+      <div><span class="eyebrow">YOUR ORDERS</span><h2>My Orders</h2></div>
+      <button class="close-modal" data-close="orderHistoryDialog" aria-label="Close">×</button>
+    </div>
+    <div class="order-filter-tabs">
+      <button class="order-filter-tab active" data-status="All">All</button>
+      <button class="order-filter-tab" data-status="Pending">Pending</button>
+      <button class="order-filter-tab" data-status="Processing">Processing</button>
+      <button class="order-filter-tab" data-status="Delivered">Delivered</button>
+      <button class="order-filter-tab" data-status="Cancelled">Cancelled</button>
+    </div>
+    <div id="orderHistoryContainer" class="order-history-list"></div>
+  </dialog>
+
+  <!-- User Profile Dialog -->
+  <dialog id="profileDialog" class="modal" style="width: min(520px, calc(100% - 28px));">
+    <div class="modal-head">
+      <div><span class="eyebrow">YOUR ACCOUNT</span><h2>My Profile</h2></div>
+      <button class="close-modal" data-close="profileDialog" aria-label="Close">×</button>
+    </div>
+    
+    <!-- Account Statistics -->
+    <div style="background: #f8f9f5; padding: 16px; border-radius: 12px; margin-bottom: 20px;">
+      <div style="font-size: 10px; font-weight: 700; color: #879188; margin-bottom: 10px; letter-spacing: 1px;">ACCOUNT STATISTICS</div>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+        <div style="text-align: center;">
+          <div style="font-size: 11px; color: #6f7c71; margin-bottom: 5px;">Member Since</div>
+          <div style="font-weight: 700; font-size: 12px; color: #315a3b;" id="profileMemberSince">—</div>
+        </div>
+        <div style="text-align: center; border-left: 1px solid #e5e8df; border-right: 1px solid #e5e8df;">
+          <div style="font-size: 11px; color: #6f7c71; margin-bottom: 5px;">Total Orders</div>
+          <div style="font-weight: 700; font-size: 12px; color: #315a3b;" id="profileTotalOrders">—</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 11px; color: #6f7c71; margin-bottom: 5px;">Total Spent</div>
+          <div style="font-weight: 700; font-size: 12px; color: var(--green);" id="profileTotalSpent">—</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Profile Information Form -->
+    <form id="profileForm" style="margin-bottom: 20px;">
+      <div style="font-size: 10px; font-weight: 700; color: #879188; margin-bottom: 12px; letter-spacing: 1px;">PROFILE INFORMATION</div>
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Full Name *</label>
+        <input type="text" id="profileName" required style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Phone Number *</label>
+        <input type="tel" id="profilePhone" required style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+      </div>
+      <div style="margin-bottom: 15px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Delivery Address *</label>
+        <textarea id="profileAddress" required rows="2" style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px; resize: vertical;"></textarea>
+      </div>
+      <button type="submit" class="checkout-button">Save Changes <span>→</span></button>
+    </form>
+    
+    <!-- Change Password Form -->
+    <div style="border-top: 1px solid #e5e8df; padding-top: 20px;">
+      <form id="changePasswordForm">
+        <div style="font-size: 10px; font-weight: 700; color: #879188; margin-bottom: 12px; letter-spacing: 1px;">CHANGE PASSWORD</div>
+        <div style="margin-bottom: 12px;">
+          <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Current Password *</label>
+          <input type="password" id="currentPassword" required style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+          <small id="currentPasswordError" style="display: none; color: #b91c1c; font-size: 10px; margin-top: 5px;">Incorrect current password</small>
+        </div>
+        <div style="margin-bottom: 12px;">
+          <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">New Password * (min 6 characters)</label>
+          <input type="password" id="newPassword" required minlength="6" style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Confirm New Password *</label>
+          <input type="password" id="confirmPassword" required style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+          <small id="confirmPasswordError" style="display: none; color: #b91c1c; font-size: 10px; margin-top: 5px;">Passwords do not match</small>
+        </div>
+        <button type="submit" style="width: 100%; border: 0; border-radius: 11px; background: var(--green); color: white; padding: 12px 17px; font-size: 12px; font-weight: 700; cursor: pointer;">Change Password</button>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Status Change Confirmation Dialog -->
+  <dialog id="statusChangeDialog" class="modal">
+    <div class="modal-head">
+      <div><span class="eyebrow">CONFIRM ACTION</span><h2>Update Order Status</h2></div>
+      <button class="close-modal" data-close="statusChangeDialog" aria-label="Close">×</button>
+    </div>
+    <div style="padding: 10px 0 20px;">
+      <p style="font-size: 12px; color: #6f7c71; margin-bottom: 15px;">Are you sure you want to change the status of this order?</p>
+      <div style="background: #f8f9f5; padding: 14px; border-radius: 10px; margin-bottom: 15px;">
+        <div style="font-size: 11px; color: #879188; margin-bottom: 8px;">Order ID</div>
+        <div style="font-weight: 700; font-size: 13px; color: #315a3b;" id="statusChangeOrderId"></div>
+        <div style="font-size: 11px; color: #879188; margin-top: 12px; margin-bottom: 8px;">Status Change</div>
+        <div style="font-size: 12px; color: #415d45;">
+          <span id="statusChangeOld" style="font-weight: 600;"></span>
+          <span style="margin: 0 8px; color: #879188;">→</span>
+          <span id="statusChangeNew" style="font-weight: 700; color: var(--green);"></span>
+        </div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 10px;">
+      <button onclick="cancelStatusChange()" style="flex: 1; border: 1px solid var(--line); background: white; color: #6f7c71; padding: 12px; border-radius: 10px; font-size: 11px; font-weight: 700; cursor: pointer;">Cancel</button>
+      <button onclick="confirmStatusChange()" class="checkout-button" style="flex: 1; margin: 0; justify-content: center;">Confirm <span>→</span></button>
+    </div>
+  </dialog>
+
+  <!-- Add Product Dialog -->
+  <dialog id="addProductDialog" class="modal">
+    <div class="modal-head">
+      <div><span class="eyebrow">ADD NEW ITEM</span><h2>Add Product</h2></div>
+      <button class="close-modal" data-close="addProductDialog" aria-label="Close">×</button>
+    </div>
+    <form id="addProductForm">
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Product Name *</label>
+        <input type="text" id="addProductName" required style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Category *</label>
+        <select id="addProductCategory" required style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+          <option value="">Select category</option>
+          <option value="Vegetables">Vegetables</option>
+          <option value="Fruits">Fruits</option>
+          <option value="Rice & Grains">Rice & Grains</option>
+          <option value="Root Crops">Root Crops</option>
+        </select>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+        <div>
+          <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Price *</label>
+          <input type="number" id="addProductPrice" min="0" step="0.01" required style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+        </div>
+        <div>
+          <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Unit *</label>
+          <input type="text" id="addProductUnit" required placeholder="e.g., kg, bunch" style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+        </div>
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Stock *</label>
+        <input type="number" id="addProductStock" min="0" required style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Farmer Name *</label>
+        <input type="text" id="addProductFarmer" required style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Origin *</label>
+        <input type="text" id="addProductOrigin" required placeholder="e.g., Calapan, Oriental Mindoro" style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Tag *</label>
+        <input type="text" id="addProductTag" required placeholder="e.g., Farm fresh, Organic" style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Emoji * (1-2 characters)</label>
+        <input type="text" id="addProductEmoji" required maxlength="2" placeholder="🥬" style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Image URL *</label>
+        <input type="url" id="addProductImage" required placeholder="https://..." style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+      </div>
+      <div style="margin-bottom: 20px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Description *</label>
+        <textarea id="addProductDescription" required rows="2" style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px; resize: vertical;"></textarea>
+      </div>
+      <button type="submit" class="checkout-button">Add Product <span>→</span></button>
+    </form>
+  </dialog>
+
+  <!-- Edit Product Dialog -->
+  <dialog id="editProductDialog" class="modal">
+    <div class="modal-head">
+      <div><span class="eyebrow">UPDATE PRODUCT</span><h2>Edit Product</h2></div>
+      <button class="close-modal" data-close="editProductDialog" aria-label="Close">×</button>
+    </div>
+    <form id="editProductForm">
+      <input type="hidden" id="editProductId">
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Product Name *</label>
+        <input type="text" id="editProductName" required style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Category *</label>
+        <select id="editProductCategory" required style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+          <option value="Vegetables">Vegetables</option>
+          <option value="Fruits">Fruits</option>
+          <option value="Rice & Grains">Rice & Grains</option>
+          <option value="Root Crops">Root Crops</option>
+        </select>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+        <div>
+          <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Price *</label>
+          <input type="number" id="editProductPrice" min="0" step="0.01" required style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+        </div>
+        <div>
+          <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Unit *</label>
+          <input type="text" id="editProductUnit" required style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+        </div>
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Stock *</label>
+        <input type="number" id="editProductStock" min="0" required style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Farmer Name *</label>
+        <input type="text" id="editProductFarmer" required style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Origin *</label>
+        <input type="text" id="editProductOrigin" required style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Tag *</label>
+        <input type="text" id="editProductTag" required style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Emoji *</label>
+        <input type="text" id="editProductEmoji" required maxlength="2" style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Image URL *</label>
+        <input type="url" id="editProductImage" required style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px;">
+      </div>
+      <div style="margin-bottom: 20px;">
+        <label style="display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #415d45;">Description *</label>
+        <textarea id="editProductDescription" required rows="2" style="width: 100%; padding: 12px; border: 1px solid #e5e8df; border-radius: 8px; font-size: 12px; resize: vertical;"></textarea>
+      </div>
+      <button type="submit" class="checkout-button">Update Product <span>→</span></button>
+    </form>
+  </dialog>
+
+  <!-- Delete Product Confirmation Dialog -->
+  <dialog id="deleteProductDialog" class="modal">
+    <div class="modal-head">
+      <div><span class="eyebrow">CONFIRM DELETE</span><h2>Delete Product</h2></div>
+      <button class="close-modal" data-close="deleteProductDialog" aria-label="Close">×</button>
+    </div>
+    <div style="padding: 10px 0 20px;">
+      <p style="font-size: 12px; color: #6f7c71; margin-bottom: 15px;">Are you sure you want to delete this product? This action cannot be undone.</p>
+      <div style="background: #fee; padding: 14px; border-radius: 10px; margin-bottom: 15px;">
+        <div style="font-weight: 700; font-size: 13px; color: #b91c1c;" id="deleteProductName"></div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 10px;">
+      <button onclick="cancelDeleteProduct()" style="flex: 1; border: 1px solid var(--line); background: white; color: #6f7c71; padding: 12px; border-radius: 10px; font-size: 11px; font-weight: 700; cursor: pointer;">Cancel</button>
+      <button onclick="confirmDeleteProduct()" style="flex: 1; border: 0; background: #b91c1c; color: white; padding: 12px; border-radius: 10px; font-size: 11px; font-weight: 700; cursor: pointer;">Delete Product</button>
+    </div>
+  </dialog>
+  
+  <script type="module" src="app.js"></script>
 </body>
 </html>

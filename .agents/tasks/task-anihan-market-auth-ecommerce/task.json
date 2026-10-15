@@ -1,7 +1,7 @@
 {
   "task_id": "task-anihan-market-auth-ecommerce",
-  "task_description": "Transform Anihan Market from a front-end prototype into a fully functional agricultural marketplace with user authentication, expanded product catalog (20 products), shopping cart with checkout, order management, and admin CRUD operations, all persisted in localStorage",
+  "task_description": "Complete the Anihan Market e-commerce system with user and admin functionality for agricultural product marketplace",
   "status": "pending",
-  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003", "FEAT-004"],
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003", "FEAT-004", "FEAT-005"],
   "blocked_reason": null
 }

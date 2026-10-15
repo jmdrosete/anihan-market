@@ -1,0 +1,41 @@
+{
+  "id": "FEAT-005",
+  "type": "feat",
+  "description": "Implement User Profile Management with editable profile info, password change, and account statistics. Enhances user engagement and account security.",
+  "status": "completed",
+  "steps": [
+    "Add updateUser(userId, updates) function to database.js that finds user by id, merges updates (name, phone, address), saves to localStorage, updates session if current user, returns updated user or null",
+    "Add updateUserPassword(userId, newPasswordHash) function to database.js that finds user, updates passwordHash field, saves, returns success boolean",
+    "Add 'My Profile' button to user menu in index.html topbar between userName span and logout button, styled like admin-switch",
+    "Create profile modal in index.html with three sections: 1) Editable profile form (name, phone, address fields pre-filled, save button), 2) Change password form (current password, new password, confirm password fields, change password button), 3) Account stats display (joined date, total orders, total spent - read-only). Use panel-card styling with section dividers.",
+    "In app.js, add event listener for 'My Profile' button that calls renderProfile() and shows modal. Function should get current user from session, populate form fields with user data, calculate stats (get user orders, sum totals, format joined date)",
+    "Add handleUpdateProfile handler for profile form submit: validate fields not empty, call updateUser(userId, {name, phone, address}), update session and userName display, show success toast",
+    "Add handleChangePassword handler for password form submit: validate current password matches (call verifyPassword from auth.js), validate new password and confirm match, new password length >= 6, call hashPassword and updateUserPassword, show success toast, clear password fields",
+    "Display account statistics: format createdAt date as 'Member since Month Year', count total orders from getUserOrders(), sum order.total for total spent, display with peso formatting",
+    "Add validation error messages: show inline errors for empty required fields, password mismatch, weak password (< 6 chars), incorrect current password"
+  ],
+  "acceptance_criteria": [
+    "Authenticated users see 'My Profile' button in topbar",
+    "Clicking 'My Profile' opens modal with pre-filled profile data",
+    "Profile section shows three areas: editable info, password change, account stats",
+    "Updating profile (name/phone/address) saves to localStorage and updates session",
+    "Changing password validates current password, matches new password confirmation, requires 6+ characters",
+    "Account stats show: member since date, total orders count, total amount spent",
+    "Form validation shows inline error messages for invalid inputs",
+    "Success toasts appear after successful profile or password updates"
+  ],
+  "verification": [
+    "Login as user with existing orders",
+    "Click 'My Profile' - verify modal opens with correct user data",
+    "Edit name and address, click Save - verify success toast and userName updates in topbar",
+    "Refresh page, reopen profile - verify changes persisted",
+    "Try changing password with wrong current password - verify error message",
+    "Try new password with mismatch confirmation - verify error",
+    "Change password successfully with valid inputs - verify success toast",
+    "Logout and login with new password - verify it works",
+    "Check account stats section shows correct order count and total spent",
+    "Test with new user (no orders) - verify stats show 0 orders and ₱0 spent"
+  ],
+  "blocked_reason": null,
+  "findings": "Implementation complete. All profile management features working as expected: updateUser and updateUserPassword functions added to database.js with session update logic, My Profile button added to topbar between userName and My Orders, profile modal created with three sections (account statistics, profile form, password change form), renderProfile function populates form with current user data and calculates stats (member since date formatted as 'Month Year', total orders count, total spent with peso formatting), profileForm handler validates required fields and updates user data with session refresh and topbar userName update, changePasswordForm handler validates current password using verifyPassword, checks new password length >= 6 characters, confirms password match, updates password with hashPassword, inline error messages for incorrect current password and password mismatch, success toasts for both profile and password updates, hashPassword and verifyPassword imported from auth.js, findUserByEmail imported from database.js for full user data retrieval. All updates persist to localStorage and session."
+}
