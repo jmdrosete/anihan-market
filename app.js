@@ -36,27 +36,45 @@ function notify(message){
 // AUTHENTICATION UI HANDLERS
 // ========================================
 
+// Page visibility handler (Landing page vs Marketplace)
+function updatePageView() {
+  const authenticated = isAuthenticated();
+  const landingPage = document.getElementById("landingPage");
+  const marketplacePage = document.getElementById("marketplacePage");
+  
+  if (authenticated) {
+    landingPage?.classList.add("hidden");
+    marketplacePage?.classList.remove("hidden");
+  } else {
+    landingPage?.classList.remove("hidden");
+    marketplacePage?.classList.add("hidden");
+  }
+}
+
 // Check authentication status on load
 function updateAuthUI() {
   const user = getCurrentUser();
   const authButtons = document.getElementById("authButtons");
   const userInfo = document.getElementById("userInfo");
+  const adminSwitch = document.getElementById("adminSwitch");
   
   if (isAuthenticated()) {
-    authButtons.classList.add("hidden");
-    userInfo.classList.remove("hidden");
-    document.getElementById("userName").textContent = user.name;
+    authButtons?.classList.add("hidden");
+    userInfo?.classList.remove("hidden");
+    if (document.getElementById("userName") && user) {
+      document.getElementById("userName").textContent = user.name;
+    }
     
     // Show/hide admin button based on role
     if (isAdmin()) {
-      document.getElementById("adminSwitch").classList.remove("hidden");
+      adminSwitch?.classList.remove("hidden");
     } else {
-      document.getElementById("adminSwitch").classList.add("hidden");
+      adminSwitch?.classList.add("hidden");
     }
   } else {
-    authButtons.classList.remove("hidden");
-    userInfo.classList.add("hidden");
-    document.getElementById("adminSwitch").classList.add("hidden");
+    authButtons?.classList.remove("hidden");
+    userInfo?.classList.add("hidden");
+    adminSwitch?.classList.add("hidden");
   }
 }
 
@@ -71,7 +89,15 @@ document.getElementById("userLoginForm")?.addEventListener("submit", (e) => {
     document.getElementById("loginDialog").close();
     notify(`Welcome back, ${result.user.name}!`);
     updateAuthUI();
+    updatePageView();
     document.getElementById("userLoginForm").reset();
+
+    // If logged in as admin, switch directly to admin dashboard
+    if (result.user.role === 'admin') {
+      showAdmin(true);
+    } else {
+      showAdmin(false);
+    }
   } else {
     notify(result.error);
   }
@@ -108,6 +134,7 @@ document.getElementById("adminLoginForm")?.addEventListener("submit", (e) => {
     document.getElementById("adminLoginDialog").close();
     notify("Admin access granted");
     updateAuthUI();
+    updatePageView();
     showAdmin(true);
     document.getElementById("adminLoginForm").reset();
   } else {
@@ -120,7 +147,9 @@ document.getElementById("logoutButton")?.addEventListener("click", () => {
   logout();
   notify("Logged out successfully");
   updateAuthUI();
+  updatePageView();
   showAdmin(false);
+  window.scrollTo({ top: 0, behavior: "smooth" });
 });
 
 // ========================================
@@ -666,7 +695,7 @@ document.getElementById("adminSwitch")?.addEventListener("click",()=>{
     document.getElementById("adminLoginDialog").showModal();
     return;
   }
-  showAdmin(buyer.classList.contains("hidden"));
+  showAdmin(admin.classList.contains("hidden"));
 });
 
 document.getElementById("backToShop")?.addEventListener("click",()=>showAdmin(false));
@@ -915,8 +944,84 @@ window.confirmDeleteProduct = confirmDeleteProduct;
 window.cancelDeleteProduct = cancelDeleteProduct;
 
 // ========================================
+// PASSWORD VISIBILITY TOGGLE
+// ========================================
+
+function initPasswordToggles() {
+  const eyeOpenSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+  const eyeOffSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+
+  document.querySelectorAll('.password-toggle-btn').forEach(btn => {
+    btn.innerHTML = eyeOpenSvg;
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const targetId = btn.dataset.target;
+      const input = targetId ? document.getElementById(targetId) : btn.parentElement?.querySelector('input');
+      if (!input) return;
+
+      const isPassword = input.type === 'password';
+      input.type = isPassword ? 'text' : 'password';
+      btn.innerHTML = isPassword ? eyeOffSvg : eyeOpenSvg;
+      btn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+      btn.title = isPassword ? 'Hide password' : 'Show password';
+    });
+  });
+}
+
+// ========================================
+// LANDING PAGE INTERACTION HANDLERS
+// ========================================
+
+function initLandingHandlers() {
+  document.getElementById("landingLoginBtn")?.addEventListener("click", () => {
+    document.getElementById("loginDialog")?.showModal();
+  });
+
+  document.getElementById("landingRegisterBtn")?.addEventListener("click", () => {
+    document.getElementById("registerDialog")?.showModal();
+  });
+
+  document.getElementById("heroLoginBtn")?.addEventListener("click", () => {
+    document.getElementById("loginDialog")?.showModal();
+  });
+
+  document.getElementById("heroRegisterBtn")?.addEventListener("click", () => {
+    document.getElementById("registerDialog")?.showModal();
+  });
+
+  document.getElementById("previewLoginBtn")?.addEventListener("click", () => {
+    document.getElementById("loginDialog")?.showModal();
+  });
+
+  document.getElementById("finalCtaBtn")?.addEventListener("click", () => {
+    document.getElementById("registerDialog")?.showModal();
+  });
+
+  document.getElementById("finalLoginBtn")?.addEventListener("click", () => {
+    document.getElementById("loginDialog")?.showModal();
+  });
+
+  // Smooth scroll for landing page anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', (e) => {
+      const targetId = anchor.getAttribute('href');
+      if (targetId && targetId !== '#') {
+        const target = document.querySelector(targetId);
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+    });
+  });
+}
+
+// ========================================
 // INITIALIZE
 // ========================================
 
 renderProducts();
 updateAuthUI();
+updatePageView();
+initPasswordToggles();
+initLandingHandlers();

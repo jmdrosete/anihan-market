@@ -46,9 +46,51 @@ export function initDatabase() {
   if (!localStorage.getItem('anihan_orders')) {
     localStorage.setItem('anihan_orders', JSON.stringify([]));
   }
-  if (!localStorage.getItem('anihan_users')) {
-    localStorage.setItem('anihan_users', JSON.stringify([]));
+  
+  // Ensure default admin and demo accounts exist in anihan_users
+  const existingUsers = localStorage.getItem('anihan_users');
+  let users = existingUsers ? JSON.parse(existingUsers) : [];
+  
+  const hasAdmin = users.some(u => 
+    (u.email && u.email.toLowerCase() === 'admin@anihan.ph') || 
+    (u.username && u.username.toLowerCase() === 'admin') ||
+    u.role === 'admin'
+  );
+
+  if (!hasAdmin) {
+    users.push({
+      id: 'admin',
+      name: 'Administrator',
+      email: 'admin@anihan.ph',
+      username: 'admin',
+      passwordHash: btoa('anihan2024admin'),
+      phone: '0917-123-4567',
+      address: 'Mamburao, Occidental Mindoro',
+      role: 'admin',
+      createdAt: new Date().toISOString()
+    });
   }
+
+  const hasDemoBuyer = users.some(u => 
+    (u.email && u.email.toLowerCase() === 'buyer@anihan.ph') ||
+    (u.username && u.username.toLowerCase() === 'buyer')
+  );
+
+  if (!hasDemoBuyer) {
+    users.push({
+      id: 'buyer-demo',
+      name: 'Maria Dela Cruz',
+      email: 'buyer@anihan.ph',
+      username: 'buyer',
+      passwordHash: btoa('buyer123'),
+      phone: '0918-765-4321',
+      address: 'Poblacion 1, Mamburao, Occidental Mindoro',
+      role: 'user',
+      createdAt: new Date().toISOString()
+    });
+  }
+
+  localStorage.setItem('anihan_users', JSON.stringify(users));
 }
 
 // ========================================
@@ -188,13 +230,19 @@ export function addUser(userObj) {
 }
 
 /**
- * Find user by email
- * @param {string} email - Email to search for
+ * Find user by email or username
+ * @param {string} identifier - Email or username to search for
  * @returns {Object|null} User object or null if not found
  */
-export function findUserByEmail(email) {
+export function findUserByEmail(identifier) {
+  if (!identifier) return null;
+  const clean = identifier.trim().toLowerCase();
   const users = getUsers();
-  return users.find(u => u.email.toLowerCase() === email.toLowerCase()) || null;
+  return users.find(u => 
+    (u.email && u.email.toLowerCase() === clean) ||
+    (u.username && u.username.toLowerCase() === clean) ||
+    (clean === 'admin' && (u.email.toLowerCase() === 'admin@anihan.ph' || u.role === 'admin'))
+  ) || null;
 }
 
 // ========================================

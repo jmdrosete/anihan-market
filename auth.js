@@ -103,8 +103,17 @@ export function registerUser({ name, email, password, phone, address }) {
  * @returns {Object} Success object with user data or error object
  */
 export function loginUser(email, password) {
+  if (!email || !password) {
+    return { success: false, error: 'Please enter username/email and password' };
+  }
+  const cleanId = email.trim().toLowerCase();
+  if ((cleanId === 'admin@anihan.ph' || cleanId === 'admin') && password === 'anihan2024admin') {
+    const adminSession = { id: 'admin', name: 'Administrator', email: 'admin@anihan.ph', role: 'admin' };
+    setSession(adminSession);
+    return { success: true, user: adminSession };
+  }
   // Find user by email
-  const user = findUserByEmail(email);
+  const user = findUserByEmail(cleanId);
   
   if (!user) {
     return { 
@@ -126,7 +135,7 @@ export function loginUser(email, password) {
     id: user.id,
     name: user.name,
     email: user.email,
-    role: 'user'
+    role: user.role || 'user'
   };
   
   setSession(sessionData);
@@ -149,11 +158,20 @@ export function loginUser(email, password) {
  * @returns {Object} Success object or error object
  */
 export function loginAdmin(email, password) {
+  if (!email || !password) {
+    return { 
+      success: false, 
+      error: 'Please enter admin credentials' 
+    };
+  }
+
+  const cleanId = email.trim().toLowerCase();
+
   // Check hardcoded admin credentials
-  if (email === 'admin@anihan.ph' && password === 'anihan2024admin') {
+  if ((cleanId === 'admin@anihan.ph' || cleanId === 'admin') && password === 'anihan2024admin') {
     const adminSession = {
       id: 'admin',
-      name: 'Admin',
+      name: 'Administrator',
       email: 'admin@anihan.ph',
       role: 'admin'
     };
@@ -161,8 +179,24 @@ export function loginAdmin(email, password) {
     setSession(adminSession);
     
     return { 
-      success: true,
-      user: adminSession
+      success: true, 
+      user: adminSession 
+    };
+  }
+
+  // Also check database if present
+  const user = findUserByEmail(cleanId);
+  if (user && user.role === 'admin' && verifyPassword(password, user.passwordHash)) {
+    const adminSession = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: 'admin'
+    };
+    setSession(adminSession);
+    return { 
+      success: true, 
+      user: adminSession 
     };
   }
 
